@@ -7,7 +7,7 @@ from database import Base
 class Spot(Base):
     __tablename__ = "spots"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     address = Column(String, nullable=False)
     category = Column(String, nullable=False)
