@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -55,3 +55,12 @@ def create_spot(spot: SpotCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_spot)
     return new_spot
+
+
+# 1件取得
+@app.get("/spots/{spot_id}", response_model=SpotRead)
+def get_spot(spot_id: int, db: Session = Depends(get_db)):
+    spot = db.get(Spot, spot_id)
+    if spot is None:
+        raise HTTPException(status_code=404, detail="Spot not found")
+    return spot
