@@ -64,3 +64,18 @@ def get_spot(spot_id: int, db: Session = Depends(get_db)):
     if spot is None:
         raise HTTPException(status_code=404, detail="Spot not found")
     return spot
+
+
+# 編集
+@app.put("/spots/{spot_id}", response_model=SpotRead)
+def update_spot(spot_id: int, spot_in:SpotCreate, db:Session = Depends(get_db)):
+    spot = db.get(Spot, spot_id)
+    if spot is None:
+        raise HTTPException(status_code=404, detail="Spot not found")
+    
+    for key, value in spot_in.model_dump().items():
+        setattr(spot, key, value)
+    
+    db.commit()
+    db.refresh(spot)
+    return spot
