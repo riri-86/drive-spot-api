@@ -79,3 +79,15 @@ def update_spot(spot_id: int, spot_in:SpotCreate, db:Session = Depends(get_db)):
     db.commit()
     db.refresh(spot)
     return spot
+
+
+# 削除
+@app.delete("/spots/{spot_id}", status_code=204)
+def delete_spot(spot_id: int, db: Session = Depends(get_db)):
+    spot = db.get(Spot, spot_id)
+    if spot is None:
+        raise HTTPException(status_code=404, detail="Spot not found")
+
+    db.delete(spot)
+    db.commit()
+
