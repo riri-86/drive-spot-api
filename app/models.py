@@ -14,3 +14,5 @@ class Spot(Base):
     memo = Column(String, nullable=True)
     visited = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    rating = Column(Integer, nullable=True)
+    

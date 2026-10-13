@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import Depends, FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -18,6 +18,7 @@ class SpotCreate(BaseModel):
     category: str
     memo: str | None = None
     visited: bool = False
+    rating: int | None = Field(default=None, ge=1, le=5)
 
 
 #スポットクラスの参照
@@ -31,6 +32,7 @@ class SpotRead(BaseModel):
     memo: str | None
     visited: bool
     created_at: datetime
+    rating: int | None 
 
 
 def get_db():
