@@ -50,8 +50,10 @@ pip install -r requirements.txt
 
 # 3. 環境変数ファイルを用意
 cp .env.example .env
-# .env を開き、「ユーザー名」と「パスワード」をどちらも postgres に書き換える
-# （手順4の POSTGRES_PASSWORD と同じ値にする）
+
+ # .env を開き、 DATABASE_URL と TEST_DATABASE_URL の両方で「ユーザー名」と「パスワード」を postgres に書き換えてください
+ # 手順4の POSTGRES_PASSWORD と同じ値にしてください
+
 
 # 4. PostgreSQL を起動
 docker run --name drive-spot-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=drive_spot -v drive-spot-data:/var/lib/postgresql/data -p 5432:5432 -d postgres:16
@@ -66,7 +68,22 @@ uvicorn app.main:app --reload
 起動後、http://127.0.0.1:8000/docs を開くと Swagger UI から API を試せます。
 
 ## テスト
-<!-- テストを書いたら追加 -->
+
+pytest でテストを実行します。テストでは開発用とは別のテスト用DB（`drive_spot_test`）を使い、テストごとにテーブルを作成・削除するため、開発用のデータには影響しません。
+
+### 準備（初回のみ）
+
+起動方法の手順4でコンテナを起動したあとに、テスト用DBを作成します。
+
+```bash
+docker exec -it drive-spot-db psql -U postgres -c "CREATE DATABASE drive_spot_test;"
+```
+
+### 実行
+
+```bash
+pytest
+```
 
 ## 工夫した点
 <!-- 各ステップの終わりに追加 -->
