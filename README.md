@@ -5,7 +5,7 @@
 ## 作った理由・今後の展望
 
 一般的なルート案内は、最短距離・最短時間を優先します。
-しかし、ドライブそのものが目的のときは、遠回りでもワインディングロードよのうな走って楽しい道を通りたいと感じていました。
+しかし、ドライブそのものが目的のときは、遠回りでもワインディングロードのような走って楽しい道を通りたいと感じていました。
 現在は地図を見ながら手作業で楽しそうな道を探し、経由地点を置いてその道を通るルートを作っています。
 
 そこで、自分で作ったドライブルートを登録し、「どれくらい走って楽しいか」を数値で比較できるアプリ（Drive Route）を目指しています。
@@ -29,6 +29,28 @@
 - POST /spots : 登録
 - PUT /spots/{id} : 編集
 - DELETE /spots/{id} : 削除
+
+## ディレクトリ構成
+
+```text
+drive-spot-api/
+├── app/
+│   ├── main.py          # アプリ本体。ルーターを登録する
+│   ├── database.py      # DB接続の設定と、セッションを渡す get_db
+│   ├── models.py        # テーブル定義（SQLAlchemy）
+│   ├── schemas/
+│   │   └── spot.py      # 入力・出力のデータの形（Pydantic）
+│   └── routers/
+│       └── spots.py     # /spots の各API処理
+├── alembic/             # テーブル構造の変更履歴（マイグレーション）
+├── tests/
+│   ├── conftest.py      # テスト用DBの準備
+│   └── test_spots.py    # APIのテスト
+├── alembic.ini          # Alembic の設定
+├── pytest.ini           # pytest の設定（app を import できるようにする）
+├── requirements.txt     # 必要なライブラリの一覧
+└── .env.example         # 環境変数のひな形
+```
 
 ## 起動方法
 
