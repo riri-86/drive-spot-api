@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.database import SessionLocal
+from app.database import get_db
 from app.models import Spot
 
 app = FastAPI()
@@ -33,14 +33,6 @@ class SpotRead(BaseModel):
     visited: bool
     created_at: datetime
     rating: int | None 
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # スポット一覧取得
