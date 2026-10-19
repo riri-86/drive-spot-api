@@ -1,38 +1,12 @@
-from datetime import datetime
-
 from fastapi import Depends, FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Spot
+from app.schemas.spot import SpotCreate, SpotRead
 
 app = FastAPI()
-
-
-# スポットクラスの生成
-class SpotCreate(BaseModel):
-    name: str
-    address: str
-    category: str
-    memo: str | None = None
-    visited: bool = False
-    rating: int | None = Field(default=None, ge=1, le=5)
-
-
-#スポットクラスの参照
-class SpotRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
-    address: str
-    category: str
-    memo: str | None
-    visited: bool
-    created_at: datetime
-    rating: int | None 
 
 
 # スポット一覧取得
