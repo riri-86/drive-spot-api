@@ -1,6 +1,11 @@
 import pytest
 
-from app.services.scoring import distance_km, route_length_km
+from app.services.scoring import (
+    detour_ratio,
+    distance_km,
+    route_length_km,
+    strait_distance_km,
+)
 
 OSAKA = (34.7025, 135.4959)
 NAGOYA = (35.1709, 136.8815)
@@ -42,3 +47,21 @@ def test_route_length_is_same_when_reversed():
     go = route_length_km([OSAKA, NAGOYA, TOKYO])
     back = route_length_km([TOKYO, NAGOYA, OSAKA])
     assert go == pytest.approx(back)
+
+
+def test_strait_distance_users_first_and_last_points():
+    assert strait_distance_km([OSAKA, NAGOYA, TOKYO]) == pytest.approx(distance_km(*OSAKA, *TOKYO))
+
+
+def test_detour_ratio_two_points_is_one():
+    assert detour_ratio([OSAKA,TOKYO]) == pytest.approx(1.0)
+
+
+def test_detour_ratio_is_at_least_one():
+    assert detour_ratio([OSAKA, NAGOYA, TOKYO]) >= 1.0
+
+
+def test_detour_ratio_same_start_and_goal_raises_error():
+    with pytest.raises(ValueError):
+        detour_ratio([OSAKA,NAGOYA, OSAKA])
+    

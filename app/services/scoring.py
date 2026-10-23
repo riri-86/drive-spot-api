@@ -22,3 +22,16 @@ def route_length_km(points: list[tuple[float, float]]) -> float:
         lat2, lon2 = points[i + 1]
         total += distance_km(lat1, lon1, lat2, lon2)
     return total
+
+
+def strait_distance_km(points: list[tuple[float, float]]) -> float:
+    """出発地（最初の点）と目的地（最後の点）の直線距離（km）を返す"""
+    return distance_km(*points[0], *points[-1])
+
+
+def detour_ratio(points: list[tuple[float, float]]) -> float:
+    """迂回率（道のり ÷ 直線距離）を返す"""
+    strait = strait_distance_km(points)
+    if strait == 0:
+        raise ValueError("出発地と目的地が同じ地点のため、迂回率を計算できません")
+    return route_length_km(points) / strait
