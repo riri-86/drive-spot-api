@@ -52,3 +52,22 @@ def turn_angle_deg(bearing1: float, bearing2: float) -> float:
     """向き1から向き2へ何度曲ったか（左右は区別せず、0以上180以下）を返す"""
     diff = abs(bearing2 - bearing1)
     return min(diff, 360 - diff)
+
+
+def curve_deg_per_km(points: list[tuple[float, float]]) -> float:
+    """1kmあたりに曲がった角度の合計（度/km）を返す"""
+    length = route_length_km(points)
+    if length == 0:
+        raise ValueError("道のりが0kmのため、1kmあたりの角度を計算できません")
+
+    bearings = []
+    for i in range(len(points) - 1):
+        if distance_km(*points[i], *points[i + 1]) == 0:
+            continue        
+        bearings.append(bearing_deg(*points[i], *points[i + 1]))
+
+    total_turn = 0.0
+    for i in range(len(bearings) - 1):
+        total_turn += turn_angle_deg(bearings[i], bearings[i + 1])
+
+    return total_turn / length

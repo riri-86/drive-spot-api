@@ -2,6 +2,7 @@ import pytest
 
 from app.services.scoring import (
     bearing_deg,
+    curve_deg_per_km,
     detour_ratio,
     distance_km,
     route_length_km,
@@ -112,3 +113,35 @@ def test_turn_angle_across_north():
 
 def test_turn_angle_left_and_right_are_same():
     assert turn_angle_deg(10, 30) == turn_angle_deg(30, 10)
+
+
+def test_curve_two_points_is_0():
+    east = (OSAKA[0], OSAKA[1] + 0.01)
+    assert curve_deg_per_km([OSAKA, east]) == 0
+
+
+def test_curve_straight_line_is_0():
+    east1 = (OSAKA[0], OSAKA[1] + 0.01)
+    east2 = (OSAKA[0], OSAKA[1] + 0.02)
+    assert curve_deg_per_km([OSAKA, east1, east2]) == pytest.approx(0, abs=0.01)
+
+
+def test_curve_one_right_angle_turn():
+    north = (OSAKA[0] + 0.01, OSAKA[1])
+    north_east = (OSAKA[0] + 0.01, OSAKA[1] + 0.01)
+    points = [OSAKA, north, north_east]
+    assert curve_deg_per_km(points) == pytest.approx(90 / route_length_km(points), abs=0.1)
+
+
+def test_curve_ignores_duplicate_points():
+    north = (OSAKA[0] + 0.01, OSAKA[1])
+    north_east = (OSAKA[0] + 0.01, OSAKA[1] + 0.01)
+    without_dup = curve_deg_per_km([OSAKA, north, north_east])
+    with_dup = curve_deg_per_km([OSAKA, north, north, north_east])
+    assert with_dup == pytest.approx(without_dup)
+
+
+def test_curve_one_point_raises_error():
+    with pytest.raises(ValueError):
+        curve_deg_per_km([OSAKA])
+
