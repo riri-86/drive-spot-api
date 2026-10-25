@@ -6,6 +6,7 @@ from app.services.scoring import (
     distance_km,
     route_length_km,
     strait_distance_km,
+    turn_angle_deg,
 )
 
 OSAKA = (34.7025, 135.4959)
@@ -91,3 +92,23 @@ def test_bearing_is_between_0_and_360():
     for start, goal in [(OSAKA, TOKYO), (TOKYO, OSAKA), (NAGOYA, OSAKA)]:
         result = bearing_deg(*start,*goal)
         assert 0 <= result < 360
+
+
+def test_turn_angle_same_bearing_is_0():
+    assert turn_angle_deg(45, 45) == 0
+
+
+def test_turn_angle_opposite_bearing_is_180():
+    assert turn_angle_deg(10, 190) ==180
+
+
+def test_turn_angle_simple_difference():
+    assert turn_angle_deg(10, 30) == 20
+
+
+def test_turn_angle_across_north():
+    assert turn_angle_deg(350, 10) == 20
+
+
+def test_turn_angle_left_and_right_are_same():
+    assert turn_angle_deg(10, 30) == turn_angle_deg(30, 10)

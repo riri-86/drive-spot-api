@@ -46,3 +46,9 @@ def bearing_deg(lat1: float, lon1: float, lat2:float, lon2: float) -> float:
     x = math.sin(dlon) * math.cos(lat2_rad)
     y = math.cos(lat1_rad) * math.sin(lat2_rad) - math.sin(lat1_rad) * math.cos(lat2_rad) * math.cos(dlon)
     return math.degrees(math.atan2(x,y)) % 360
+
+
+def turn_angle_deg(bearing1: float, bearing2: float) -> float:
+    """向き1から向き2へ何度曲ったか（左右は区別せず、0以上180以下）を返す"""
+    diff = abs(bearing2 - bearing1)
+    return min(diff, 360 - diff)
