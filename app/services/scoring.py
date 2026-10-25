@@ -35,3 +35,14 @@ def detour_ratio(points: list[tuple[float, float]]) -> float:
     if strait == 0:
         raise ValueError("出発地と目的地が同じ地点のため、迂回率を計算できません")
     return route_length_km(points) / strait
+
+
+def bearing_deg(lat1: float, lon1: float, lat2:float, lon2: float) -> float:
+    """点1から点2へ向かう方位角（北を0度として時計回り、0以上360未満を返す"""
+    lat1_rad = math.radians(lat1)
+    lat2_rad = math.radians(lat2)
+    dlon = math.radians(lon2 - lon1)
+
+    x = math.sin(dlon) * math.cos(lat2_rad)
+    y = math.cos(lat1_rad) * math.sin(lat2_rad) - math.sin(lat1_rad) * math.cos(lat2_rad) * math.cos(dlon)
+    return math.degrees(math.atan2(x,y)) % 360

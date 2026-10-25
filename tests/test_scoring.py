@@ -1,6 +1,7 @@
 import pytest
 
 from app.services.scoring import (
+    bearing_deg,
     detour_ratio,
     distance_km,
     route_length_km,
@@ -64,4 +65,29 @@ def test_detour_ratio_is_at_least_one():
 def test_detour_ratio_same_start_and_goal_raises_error():
     with pytest.raises(ValueError):
         detour_ratio([OSAKA,NAGOYA, OSAKA])
-    
+
+
+def test_bearing_due_north_is_0():
+    north = (OSAKA[0] + 0.01, OSAKA[1])
+    assert bearing_deg(*OSAKA, *north) == pytest.approx(0, abs=0.01)
+
+
+def test_bearing_due_east_is_90():
+    east = (OSAKA[0], OSAKA[1] + 0.01)
+    assert bearing_deg(*OSAKA, *east) == pytest.approx(90, abs=0.01)
+
+
+def test_bearing_due_south_is_180():
+    south = (OSAKA[0] - 0.01, OSAKA[1])
+    assert bearing_deg(*OSAKA,*south) == pytest.approx(180,abs=0.01)
+
+
+def test_bearing_due_west_is_270():
+    west = (OSAKA[0], OSAKA[1] - 0.01)
+    assert bearing_deg(*OSAKA, *west) == pytest.approx(270, abs=0.01)
+
+
+def test_bearing_is_between_0_and_360():
+    for start, goal in [(OSAKA, TOKYO), (TOKYO, OSAKA), (NAGOYA, OSAKA)]:
+        result = bearing_deg(*start,*goal)
+        assert 0 <= result < 360
