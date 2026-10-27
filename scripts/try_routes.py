@@ -42,7 +42,8 @@ response = httpx.post(URL, headers=headers, json=body)
 print(response.status_code)
 
 data = response.json()
-encoded = data["routes"][0]["polyline"]["encodedPolyline"]
+route = data["routes"][0]
+encoded = route["polyline"]["encodedPolyline"]
 
 points = polyline.decode(encoded)
 print(f"点の数：{len(points)}")
