@@ -46,14 +46,14 @@ route = data["routes"][0]
 encoded = route["polyline"]["encodedPolyline"]
 
 points = polyline.decode(encoded)
-print(f"点の数：{len(points)}")
-print(f"出発地：{points[0]}")
-print(f"目的地：{points[-1]}")
+print(f"点の数: {len(points)}")
+print(f"出発地: {points[0]}")
+print(f"目的地: {points[-1]}")
 
-print(f"自分で計算した道のり：{route_length_km(points):.2f} km")
-print(f"Google の道のり：{data["routes"][0]["distanceMeters"] / 1000:.2f} km")
-print(f"迂回率：{detour_ratio(points):.2f}")
-print(f"カーブ：{curve_deg_per_km(points):.1f} 度/km")
+print(f"自分で計算した道のり: {route_length_km(points):.2f} km")
+print(f"Google の道のり: {data["routes"][0]["distanceMeters"] / 1000:.2f} km")
+print(f"迂回率: {detour_ratio(points):.2f}")
+print(f"カーブ: {curve_deg_per_km(points):.1f} 度/km")
 
 bearings = []
 for i in range(len(points) - 1):
@@ -67,9 +67,9 @@ for i in range(len(bearings) - 1):
     angle = turn_angle_deg(bearings[i], bearings[i + 1])
     if angle >= 30:
         big += angle
-        print(f"大きな曲り：{angle:.0f} 度")
+        print(f"大きな曲り: {angle:.0f} 度")
     else:
         small += angle
 
-print(f"30度以上の合計：{big:.0f} 度")
-print(f"30度未満の合計：{small:.0f} 度")
+print(f"30度以上の合計: {big:.0f} 度")
+print(f"30度未満の合計: {small:.0f} 度")
