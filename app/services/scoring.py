@@ -71,3 +71,20 @@ def curve_deg_per_km(points: list[tuple[float, float]]) -> float:
         total_turn += turn_angle_deg(bearings[i], bearings[i + 1])
 
     return total_turn / length
+
+
+def curve_deg_per_km_by_steps(steps_points: list[list[tuple[float, float]]]) -> float:
+    """step ごとにカーブを計算し、区切りでの曲がりを省いた1kmあたりの角度（度/km）を返す"""
+    total_turn = 0.0
+    total_length = 0.0
+    for points in steps_points:
+        length = route_length_km(points)
+        if length == 0:
+            continue
+        total_turn += curve_deg_per_km(points) * length
+        total_length += length
+
+    if total_length == 0:
+        raise ValueError("道のりが0kmのため、1kmあたりの角度を計算できません")
+
+    return total_turn / total_length

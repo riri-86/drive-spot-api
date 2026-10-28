@@ -3,6 +3,7 @@ import pytest
 from app.services.scoring import (
     bearing_deg,
     curve_deg_per_km,
+    curve_deg_per_km_by_steps,
     detour_ratio,
     distance_km,
     route_length_km,
@@ -145,3 +146,33 @@ def test_curve_one_point_raises_error():
     with pytest.raises(ValueError):
         curve_deg_per_km([OSAKA])
 
+
+def test_curve_by_steps_ignores_turn_at_step_boundary():
+    north1 = (OSAKA[0] + 0.01, OSAKA[1])
+    north2 = (OSAKA[0] + 0.02, OSAKA[1])
+    east1 = (north2[0], north2[1] + 0.01)
+    east2 = (north2[0], north2[1] + 0.02)
+    steps_points = [[OSAKA, north1, north2], [north2, east1, east2]]
+    assert curve_deg_per_km_by_steps(steps_points) == pytest.approx(0, abs=0.01)
+
+
+def test_curve_by_steps_weights_by_length():
+    north = (OSAKA[0] + 0.01, OSAKA[1])
+    north2 = (OSAKA[0] + 0.02, OSAKA[1])
+    north2_east = (north2[0], north2[1] + 0.01)
+    straight_step = [OSAKA, north]
+    turn_step = [north, north2, north2_east]
+    expected = 90 / (route_length_km(straight_step) + route_length_km(turn_step))
+    assert curve_deg_per_km_by_steps([straight_step, turn_step]) == pytest.approx(expected,abs=0.1)
+
+
+def test_curve_by_steps_skips_zero_length_step():
+    north = (OSAKA[0] + 0.01, OSAKA[1])
+    north_east = (OSAKA[0] + 0.01, OSAKA[1] + 0.01)
+    points = [OSAKA,north, north_east]
+    assert curve_deg_per_km_by_steps([points, [north_east]]) == pytest.approx(curve_deg_per_km(points))
+
+
+def test_curve_by_steps_allzero_length_raises_error():
+    with pytest.raises(ValueError):
+        curve_deg_per_km_by_steps([[OSAKA],[OSAKA, OSAKA]])
