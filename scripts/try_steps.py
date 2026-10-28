@@ -6,7 +6,7 @@ import httpx
 import polyline
 from dotenv import load_dotenv
 
-from app.services.scoring import curve_deg_per_km, route_length_km
+from app.services.scoring import curve_deg_per_km, curve_deg_per_km_by_steps 
 
 load_dotenv()
 
@@ -44,17 +44,9 @@ print(f"step の数：{len(steps)}")
 all_points = polyline.decode(route["polyline"]["encodedPolyline"])
 print(f"区切りも含めたカーブ：{curve_deg_per_km(all_points):.1f} 度/km")
 
-total_turn = 0.0
-total_length = 0.0
+steps_points = []
 for step in steps:
     points = polyline.decode(step["polyline"]["encodedPolyline"])
-    length = route_length_km(points)
-    if length == 0:
-        continue
-    turn = curve_deg_per_km(points) * length
-    maneuver = step.get("navigationInstruction", {}).get("maneuver")
-    print(f"{maneuver}：{length:.2f} km, 曲がった量{turn:.0f} 度")
-    total_turn += turn
-    total_length += length
+    steps_points.append(points)
 
-print(f"区切りを省いたカーブ：{total_turn / total_length:.1f} 度/km")
+print(f"区切りを省いたカーブ：{curve_deg_per_km_by_steps(steps_points):.1f} 度/km")
