@@ -39,14 +39,14 @@ print(response.status_code)
 data = response.json()
 route = data["routes"][0]
 steps = route["legs"][0]["steps"]
-print(f"step の数：{len(steps)}")
+print(f"step の数: {len(steps)}")
 
 all_points = polyline.decode(route["polyline"]["encodedPolyline"])
-print(f"区切りも含めたカーブ：{curve_deg_per_km(all_points):.1f} 度/km")
+print(f"区切りも含めたカーブ: {curve_deg_per_km(all_points):.1f} 度/km")
 
 steps_points = []
 for step in steps:
     points = polyline.decode(step["polyline"]["encodedPolyline"])
     steps_points.append(points)
 
-print(f"区切りを省いたカーブ：{curve_deg_per_km_by_steps(steps_points):.1f} 度/km")
+print(f"区切りを省いたカーブ: {curve_deg_per_km_by_steps(steps_points):.1f} 度/km")
