@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -48,4 +49,19 @@ def create_route(route_in: RouteCreate, db: Session = Depends(get_db)):
     db.add(route)
     db.commit()
     db.refresh(route)
+    return route
+
+
+# ルート一覧を取得
+@router.get("/routes", response_model=list[RouteRead])
+def list_routes(db: Session = Depends(get_db)):
+    return db.scalars(select(Route).order_by(Route.id)).all()
+
+
+# ルート1件を取得
+@router.get("/routes/{route_id}", response_model=RouteRead)
+def get_route(route_id: int, db: Session = Depends(get_db)):
+    route = db.get(Route, route_id)
+    if route is None:
+        raise HTTPException(status_code=404, detail="Route not found")
     return route
