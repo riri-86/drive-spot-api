@@ -69,3 +69,25 @@ def test_create_route_pass_vias_in_order(client, monkeypatch):
 
     assert sent["vias"] == [(34.01, 135.0), (34.02, 135.0)]
     assert [via["position"] for via in response.json()["vias"]] == [1, 2]
+
+
+def test_list_routes_in_id_order(client, monkeypatch):
+    def fake_fetch_route_steps(origin, destination, vias):
+        return [STEP_NORTH, STEP_EAST]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    client.post("/routes", json={**ROUTE_DATA, "name": "1つ目"})
+    client.post("/routes", json={**ROUTE_DATA, "name": "2つ目", "vias": []})
+
+    response = client.get("/routes")
+
+    assert response.status_code == 200
+    assert [route["name"] for route in response.json()] == ["1つ目", "2つ目"]
+
+
+def test_get_route_not_found(client):
+    response = client.get("/routes/99")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Route not found"
