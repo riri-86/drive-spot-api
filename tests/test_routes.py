@@ -1,7 +1,9 @@
 """POST /routes のテスト(Google は呼ばず、fetch_route_steps を作り物に入れ替える)"""
 
+from app.models import RouteVia
 from app.routers import routes as routes_router
 from app.services.routes_api import RoutesApiError
+from tests.conftest import TestingSessionLocal
 
 STEP_NORTH = [(34.0, 135.0), (34.01, 135.0)]
 STEP_EAST = [(34.01, 135.0), (34.01, 135.01)]
@@ -91,3 +93,27 @@ def test_get_route_not_found(client):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Route not found"
+
+
+def test_delete_route_also_deletes_vias(client, monkeypatch):
+    def fake_fetch_route_steps(origin, destination, vias):
+        return [STEP_NORTH, STEP_EAST]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    client.post("/routes", json=ROUTE_DATA)
+
+    response = client.delete("/routes/1")
+
+    assert response.status_code == 204
+    assert client.get("/routes/1").status_code == 404
+
+    db = TestingSessionLocal()
+    assert db.query(RouteVia).count() == 0
+    db.close()
+
+
+def test_delete_route_not_found(client):
+    response = client.delete("/routes/99")
+
+    assert response.status_code == 404

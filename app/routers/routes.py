@@ -65,3 +65,14 @@ def get_route(route_id: int, db: Session = Depends(get_db)):
     if route is None:
         raise HTTPException(status_code=404, detail="Route not found")
     return route
+
+
+# ルート削除
+@router.delete("/routes/{route_id}", status_code=204)
+def delete_route(route_id: int, db: Session = Depends(get_db)):
+    route = db.get(Route, route_id)
+    if route is None:
+        raise HTTPException(status_code=404, detail="Route not found")
+
+    db.delete(route)
+    db.commit()

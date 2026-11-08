@@ -15,6 +15,7 @@ OSAKA = (34.7025, 135.4959)
 NAGOYA = (35.1709, 136.8815)
 TOKYO = (35.6812, 139.7671)
 
+
 def test_distance_same_point_is_zero():
     assert distance_km(34.70, 135.50, 34.70, 135.50) == 0
 
