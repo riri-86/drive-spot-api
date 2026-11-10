@@ -117,3 +117,54 @@ def test_delete_route_not_found(client):
     response = client.delete("/routes/99")
 
     assert response.status_code == 404
+
+
+def test_update_route_name_only_does_not_call_google(client, monkeypatch):
+    calls = []
+
+    def fake_fetch_route_steps(origin, destination, vias):
+        calls.append(vias)
+        return [STEP_NORTH, STEP_EAST]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    client.post("/routes", json=ROUTE_DATA)
+    response = client.put("/routes/1", json={**ROUTE_DATA, "name": "新しい名前"})
+
+    assert response.status_code == 200
+    assert response.json()["name"] == "新しい名前"
+    assert len(calls) == 1
+
+
+def test_update_route_rescores_and_replaces_vias(client, monkeypatch):
+    calls = []
+
+    def fake_fetch_route_steps(origin, destination, vias):
+        calls.append(vias)
+        if len(calls) == 1:
+            return [STEP_NORTH, STEP_EAST]
+        return [STEP_NORTH]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    created = client.post("/routes", json=ROUTE_DATA).json()
+
+    new_vias = [{"lat": 34.005, "lng": 135.0}, {"lat": 34.01, "lng": 135.005}]
+    response = client.put("/routes/1", json={**ROUTE_DATA, "vias": new_vias})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(calls) == 2
+    assert body["length_km"] < created["length_km"]
+    assert [via["position"] for via in body["vias"]] == [1, 2]
+
+    db = TestingSessionLocal()
+    assert db.query(RouteVia).count() == 2
+    db.close()
+
+
+def test_update_route_not_found(client):
+    response = client.put("/routes/99", json=ROUTE_DATA)
+
+    assert response.status_code == 404
+    
