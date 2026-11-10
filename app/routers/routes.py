@@ -85,3 +85,42 @@ def delete_route(route_id: int, db: Session = Depends(get_db)):
 
     db.delete(route)
     db.commit()
+
+
+# 編集(地点が変わった時だけ、Google を呼び直して採点し直す)
+@router.put("/routes/{route_id}", response_model=RouteRead)
+def update_route(route_id: int, route_in: RouteCreate, db: Session = Depends(get_db)):
+    route = db.get(Route, route_id)
+    if route is None:
+        raise HTTPException(status_code=404, detail="Route not found")
+
+    old_places = (
+        (route.origin_lat, route.origin_lng),
+        (route.destination_lat, route.destination_lng),
+        [(via.lat, via.lng) for via in route.vias],
+    )
+    new_places = (
+        (route_in.origin_lat, route_in.origin_lng),
+        (route_in.destination_lat, route_in.destination_lng),
+        [(via.lat, via.lng) for via in route_in.vias],
+    )
+
+    if new_places != old_places:
+        scores = fetch_and_score(route_in)
+        for key, value in scores.items():
+            setattr(route, key, value)
+
+        route.origin_lat = route_in.origin_lat
+        route.origin_lng = route_in.origin_lng
+        route.destination_lat = route_in.destination_lat
+        route.destination_lng = route_in.destination_lng
+        route.vias = [
+            RouteVia(position=position, lat=via.lat, lng=via.lng)
+            for position, via in enumerate(route_in.vias, start=1)
+        ]
+
+    route.name = route_in.name
+
+    db.commit()
+    db.refresh(route)
+    return route
