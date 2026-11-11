@@ -167,4 +167,29 @@ def test_update_route_not_found(client):
     response = client.put("/routes/99", json=ROUTE_DATA)
 
     assert response.status_code == 404
-    
+
+
+def test_list_routes_sorted_by_length_desc(client, monkeypatch):
+    calls = []
+
+    def fake_fetch_route_steps(origin, destination, vias):
+        calls.append(vias)
+        if len(calls) == 1:
+            return [STEP_NORTH]
+        return [STEP_NORTH, STEP_EAST]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    client.post("/routes", json={**ROUTE_DATA, "name": "短いルート"})
+    client.post("/routes", json={**ROUTE_DATA, "name": "長いルート"})
+
+    response = client.get("/routes?sort=length_km&order=desc")
+
+    assert response.status_code == 200
+    assert [route["name"] for route in response.json()] == ["長いルート", "短いルート"]
+
+
+def test_list_routes_rekects_unknown_sort(client):
+    response = client.get("routes?sort=name")
+
+    assert response.status_code == 422
