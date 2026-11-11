@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from typing import Literal
 
 from app.database import get_db
 from app.models import Route, RouteVia
@@ -62,9 +63,24 @@ def create_route(route_in: RouteCreate, db: Session = Depends(get_db)):
 
 
 # ルート一覧を取得
+SORT_COLUMNS = {
+    "id": Route.id,
+    "length_km": Route.length_km,
+    "detour_ratio": Route.detour_ratio,
+    "curve_deg_per_km": Route.curve_deg_per_km,
+}
+
+
 @router.get("/routes", response_model=list[RouteRead])
-def list_routes(db: Session = Depends(get_db)):
-    return db.scalars(select(Route).order_by(Route.id)).all()
+def list_routes(
+    sort: Literal["id", "length_km", "detour_ratio", "curve_deg_per_km"] = "id",
+    order: Literal["asc", "desc"] = "asc",
+    db: Session = Depends(get_db),
+):
+    column = SORT_COLUMNS[sort]
+    if order == "desc":
+        column = column.desc()
+    return db.scalars(select(Route).order_by(column, Route.id)).all()
 
 
 # ルート1件を取得
