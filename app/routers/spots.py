@@ -1,3 +1,4 @@
+from app.auth import require_api_key
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,7 +17,7 @@ def list_spots(db: Session = Depends(get_db)):
 
 
 # スポット登録
-@router.post("/spots", response_model=SpotRead, status_code=201)
+@router.post("/spots", response_model=SpotRead, status_code=201, dependencies=[Depends(require_api_key)])
 def create_spot(spot: SpotCreate, db: Session = Depends(get_db)):
     new_spot = Spot(**spot.model_dump())
     db.add(new_spot)
@@ -35,7 +36,7 @@ def get_spot(spot_id: int, db: Session = Depends(get_db)):
 
 
 # 編集
-@router.put("/spots/{spot_id}", response_model=SpotRead)
+@router.put("/spots/{spot_id}", response_model=SpotRead, dependencies=[Depends(require_api_key)])
 def update_spot(spot_id: int, spot_in:SpotCreate, db:Session = Depends(get_db)):
     spot = db.get(Spot, spot_id)
     if spot is None:
@@ -50,7 +51,7 @@ def update_spot(spot_id: int, spot_in:SpotCreate, db:Session = Depends(get_db)):
 
 
 # 削除
-@router.delete("/spots/{spot_id}", status_code=204)
+@router.delete("/spots/{spot_id}", status_code=204, dependencies=[Depends(require_api_key)])
 def delete_spot(spot_id: int, db: Session = Depends(get_db)):
     spot = db.get(Spot, spot_id)
     if spot is None:

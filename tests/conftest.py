@@ -27,9 +27,14 @@ def override_get_db():
         db.close()
 
 
+TEST_ADMIN_API_KEY = "test-admin-key"
+
+
 @pytest.fixture
-def client():
+def client(monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", TEST_ADMIN_API_KEY)
     Base.metadata.create_all(bind=testing_engine)
     app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
+    yield TestClient(app, headers={"X-API-Key": TEST_ADMIN_API_KEY})
+    app.dependency_overrides.clear()
     Base.metadata.drop_all(bind=testing_engine)

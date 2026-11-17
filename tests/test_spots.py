@@ -63,3 +63,27 @@ def test_delete_spot(client):
 
     response = client.get(f"/spots/{spot_id}")
     assert response.status_code == 404
+
+
+
+def test_create_spot_without_api_key_returns_401(client):
+    del client.headers["X-API-Key"]
+
+    response = client.post("/spots", json=SPOT_DATA)
+
+    assert response.status_code == 401
+    assert client.get("/spots").json() == []
+
+
+def test_create_spot_with_wrong_api_key_returns_401(client):
+    response = client.post("/spots", json=SPOT_DATA, headers={"X-API-Key": "wrong-key"})
+
+    assert response.status_code == 401
+
+
+def test_create_spot_returns_500_when_admin_api_key_not_set(client, monkeypatch):
+    monkeypatch.delenv("ADMIN_API_KEY")
+
+    response = client.post("/spots", json=SPOT_DATA)
+
+    assert response.status_code == 500

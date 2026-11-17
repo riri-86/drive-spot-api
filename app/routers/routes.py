@@ -1,3 +1,4 @@
+from app.auth import require_api_key
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -40,7 +41,7 @@ def fetch_and_score(route_in: RouteCreate) -> dict:
     
 
 # ルート登録(Google からルートを受け取り、採点して保存する)
-@router.post("/routes", response_model=RouteRead, status_code=201)
+@router.post("/routes", response_model=RouteRead, status_code=201, dependencies=[Depends(require_api_key)])
 def create_route(route_in: RouteCreate, db: Session = Depends(get_db)):
     scores = fetch_and_score(route_in)
 
@@ -93,7 +94,7 @@ def get_route(route_id: int, db: Session = Depends(get_db)):
 
 
 # ルート削除
-@router.delete("/routes/{route_id}", status_code=204)
+@router.delete("/routes/{route_id}", status_code=204, dependencies=[Depends(require_api_key)])
 def delete_route(route_id: int, db: Session = Depends(get_db)):
     route = db.get(Route, route_id)
     if route is None:
@@ -104,7 +105,7 @@ def delete_route(route_id: int, db: Session = Depends(get_db)):
 
 
 # 編集(地点が変わった時だけ、Google を呼び直して採点し直す)
-@router.put("/routes/{route_id}", response_model=RouteRead)
+@router.put("/routes/{route_id}", response_model=RouteRead, dependencies=[Depends(require_api_key)])
 def update_route(route_id: int, route_in: RouteCreate, db: Session = Depends(get_db)):
     route = db.get(Route, route_id)
     if route is None:
