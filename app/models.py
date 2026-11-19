@@ -6,6 +6,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -37,6 +38,7 @@ class Route(Base):
     length_km = Column(Float,nullable=False)
     detour_ratio = Column(Float,nullable=False)
     curve_deg_per_km = Column(Float,nullable=False)
+    encoded_polyline = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     vias = relationship(

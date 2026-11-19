@@ -1,3 +1,5 @@
+import polyline
+
 from app.auth import require_api_key
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -35,6 +37,7 @@ def fetch_and_score(route_in: RouteCreate) -> dict:
             "length_km": route_length_km(points),
             "detour_ratio": detour_ratio(points),
             "curve_deg_per_km": curve_deg_per_km_by_steps(steps_points),
+            "encoded_polyline": polyline.encode(points),
         }
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
