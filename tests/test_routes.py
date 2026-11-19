@@ -1,5 +1,7 @@
 """POST /routes のテスト(Google は呼ばず、fetch_route_steps を作り物に入れ替える)"""
 
+import polyline
+
 from app.models import RouteVia
 from app.routers import routes as routes_router
 from app.services.routes_api import RoutesApiError
@@ -193,3 +195,18 @@ def test_list_routes_rekects_unknown_sort(client):
     response = client.get("routes?sort=name")
 
     assert response.status_code == 422
+
+
+def test_get_route_returns_shape_but_list_does_not(client, monkeypatch):
+    def fake_fetch_route_steps(origin, destination, vias):
+        return [STEP_NORTH, STEP_EAST]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    client.post("/routes", json=ROUTE_DATA)
+
+    detail = client.get("/routes/1").json()
+    assert polyline.decode(detail["encoded_polyline"]) == STEP_NORTH + STEP_EAST
+
+    listed = client.get("/routes").json()
+    assert "encoded_polyline" not in listed[0]

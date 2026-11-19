@@ -8,7 +8,7 @@ from typing import Literal
 
 from app.database import get_db
 from app.models import Route, RouteVia
-from app.schemas.route import RouteCreate, RouteRead
+from app.schemas.route import RouteCreate, RouteRead, RouteDetail
 from app.services.routes_api import RoutesApiError, fetch_route_steps
 from app.services.scoring import curve_deg_per_km_by_steps, detour_ratio, route_length_km
 
@@ -88,7 +88,7 @@ def list_routes(
 
 
 # ルート1件を取得
-@router.get("/routes/{route_id}", response_model=RouteRead)
+@router.get("/routes/{route_id}", response_model=RouteDetail)
 def get_route(route_id: int, db: Session = Depends(get_db)):
     route = db.get(Route, route_id)
     if route is None:

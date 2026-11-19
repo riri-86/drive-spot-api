@@ -43,3 +43,8 @@ class RouteRead(BaseModel):
     detour_ratio: float
     curve_deg_per_km: float
     created_at: datetime
+
+
+# ルートの参照(1件、道の形も返す)
+class RouteDetail(RouteRead):
+    encoded_polyline: str | None
