@@ -5,13 +5,51 @@
     <title>Drive Route</title>
     <style>
         html, body { height: 100%; margin: 0; }
-        #map { height: 100%; }
+        body { display: flex; font-family: sans-serif; }
+        #sidebar { width: 300px; padding: 12px; overflow-y: auto; }
+        #map { flex: 1; }
+        #route-list { list-style: none; padding: 0; }
+        #route-list li { padding: 8px; border-bottom: 1px solid #ddd; cursor: pointer; }
     </style>
 </head>
 <body>
+    <div id="sidebar">
+        <h1>Drive Route</h1>
+        <select id="sort">
+            <option value="id">登録順</option>
+            <option value="curve_deg_per_km">カーブの多さ</option>
+            <option value="detour_ratio">迂回率</option>
+            <option value="length_km">道のり</option>
+        </select>
+        <select id="order">
+            <option value="asc">小さい順</option>
+            <option value="desc">大きい順</option>
+        </select>
+        <ul id="route-list"></ul>
+    </div>
     <div id="map"></div>
 
     <script>
+        async function loadRoutes() {
+            const sort = document.getElementById("sort").value;
+            const order = document.getElementById("order").value;
+            const response = await fetch(`/routes?sort=${sort}&order=${order}`);
+            const routes = await response.json();
+
+            const list = document.getElementById("route-list");
+            list.innerHTML = "";
+            for (const route of routes) {
+                const item = document.createElement("li");
+                item.textContent = 
+                  `${route.name} (${route.length_km.toFixed(1)} km･迂回率 ${route.detour_ratio.toFixed(2)}･カーブ ${route.curve_deg_per_km.toFixed(0)} 度/km) `;
+                list.appendChild(item);
+            }
+        }
+
+        document.getElementById("sort").addEventListener("change", loadRoutes);
+        document.getElementById("order").addEventListener("change", loadRoutes);
+        loadRoutes();
+        
         function initMap() {
             new google.maps.Map(document.getElementById("map"), {
                 center: { lat:34.75, lng: 135.35 },
