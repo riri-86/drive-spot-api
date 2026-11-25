@@ -25,11 +25,15 @@
             <option value="asc">小さい順</option>
             <option value="desc">大きい順</option>
         </select>
+        <p id="message"></p>
         <ul id="route-list"></ul>
     </div>
     <div id="map"></div>
 
     <script>
+        let map;
+        let currentLine = null;
+
         async function loadRoutes() {
             const sort = document.getElementById("sort").value;
             const order = document.getElementById("order").value;
@@ -42,23 +46,55 @@
                 const item = document.createElement("li");
                 item.textContent = 
                   `${route.name} (${route.length_km.toFixed(1)} km･迂回率 ${route.detour_ratio.toFixed(2)}･カーブ ${route.curve_deg_per_km.toFixed(0)} 度/km) `;
+                item.addEventListener("click", () => showRoute(route.id));
                 list.appendChild(item);
             }
+        }
+
+        async function showRoute(routeId) {
+            const response = await fetch(`/routes/${routeId}`);
+            const route = await response.json();
+            const message = document.getElementById("message");
+
+            if (currentLine !== null) {
+                currentLine.setMap(null);
+                cyrrentLine = null;
+            }
+
+            if (route.encoded_polyline === null) {
+                message.textContent = `「${route.name}」は道の形が保存されていません`;
+                return;
+            }
+            message.textContent = "";
+
+            const path = google.maps.geometry.encoding.decodePath(route.encoded_polyline);
+            currentLine = new google.maps.Polyline({
+                path: path,
+                map: map,
+                strokeColor: "#d93025",
+                strokeWeight: 5,
+            });
+
+            const bounds = new google.maps.LatLngBounds();
+            for (const point of path) {
+                bounds.extend(point);
+            }
+            map.fitBounds(bounds);
         }
 
         document.getElementById("sort").addEventListener("change", loadRoutes);
         document.getElementById("order").addEventListener("change", loadRoutes);
         loadRoutes();
-        
+
         function initMap() {
-            new google.maps.Map(document.getElementById("map"), {
-                center: { lat:34.75, lng: 135.35 },
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 34.75, lng: 135.35 },
                 zoom: 10,
             });
         }
     </script>
     <script async
-        src="https://maps.googleapis.com/maps/api/js?key={{ maps_key }}&loading=async&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key={{ maps_key }}&libraries=geometry&loading=async&callback=initMap">
     </script>
 </body>
 </html>
