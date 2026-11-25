@@ -210,3 +210,19 @@ def test_get_route_returns_shape_but_list_does_not(client, monkeypatch):
 
     listed = client.get("/routes").json()
     assert "encoded_polyline" not in listed[0]
+
+def test_create_route_sends_origin_and_destination_to_google(client, monkeypatch):
+    calls = []
+
+    def fake_fetch_route_steps(origin, destination, vias):
+        calls.append((origin, destination))
+        return [STEP_NORTH]
+
+    monkeypatch.setattr(routes_router, "fetch_route_steps", fake_fetch_route_steps)
+
+    client.post("/routes", json=(ROUTE_DATA))
+
+    assert calls == [(
+        (ROUTE_DATA["origin_lat"], ROUTE_DATA["origin_lng"]),
+        (ROUTE_DATA["destination_lat"],ROUTE_DATA["destination_lng"]),
+    )]

@@ -17,7 +17,7 @@ router = APIRouter()
 
 # Google からルートを受け取り、採点する(登録と編集の両方で使う)
 def fetch_and_score(route_in: RouteCreate) -> dict:
-    origin = (route_in.origin_lat, route_in.destination_lng)
+    origin = (route_in.origin_lat, route_in.origin_lng)
     destination = (route_in.destination_lat, route_in.destination_lng)
     vias = []
     for via in route_in.vias:
