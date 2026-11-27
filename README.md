@@ -23,10 +23,14 @@
 その土台の上に、ルートの登録・採点・地図の画面を足しています。リポジトリ名の drive-spot-api はその名残で、スポットの機能も残しています。
 
 ## 使用技術
-- Python 3.14 / FastAPI
-- SQLAlchemy（ORM）/ Pydantic（入力チェック）
-- PostgreSQL 16（Docker で起動）
-- Alembic（テーブル構造の変更管理）
+- 言語・フレームワーク:Python 3.14 / FastAPI
+- DB:PostgreSQL 16 / SQLAlchemy（ORM）/ Alembic（テーブル構造の変更管理）
+- 入力チェック:Pydantic
+- 外部API:Google Routes API(ルートの取得) / Maps JavaScript API(地図の表示)
+- 外部APIの呼び出し:httpx / polyline(道の形の文字列を座標に戻す)
+- 画面:Jinja2(HTMLテンプレート) / JavaScript
+- テスト:pytest(Google の呼び出しはモックに差し替え)
+- 実行環境:Docker / Render(公開)
 
 ## 機能
 
@@ -79,21 +83,37 @@
 ```text
 drive-spot-api/
 ├── app/
-│   ├── main.py          # アプリ本体。ルーターを登録する
-│   ├── database.py      # DB接続の設定と、セッションを渡す get_db
-│   ├── models.py        # テーブル定義（SQLAlchemy）
+│   ├── main.py            # アプリ本体。ルーターを登録する
+│   ├── database.py        # DB 接続の設定と、セッションを渡す get_db
+│   ├── models.py          # テーブル定義（spots・routes・route_vias）
+│   ├── auth.py            # 書き込みの API で合言葉（X-API-Key）を確かめる
 │   ├── schemas/
-│   │   └── spot.py      # 入力・出力のデータの形（Pydantic）
-│   └── routers/
-│       └── spots.py     # /spots の各API処理
-├── alembic/             # テーブル構造の変更履歴（マイグレーション）
+│   │   ├── spot.py        # 入力・出力のデータの形（Pydantic）
+│   │   └── route.py
+│   ├── routers/
+│   │   ├── spots.py       # /spots の API
+│   │   ├── routes.py      # /routes の API（登録・編集のときに採点する）
+│   │   └── pages.py       # /map の画面
+│   ├── services/
+│   │   ├── routes_api.py  # Google Routes API を呼び、道の点を集める
+│   │   └── scoring.py     # 道のり・迂回率・カーブの多さの計算
+│   └── templates/
+│       └── map.html       # 地図の画面（一覧の表示と、道の形を描く JavaScript）
+├── alembic/               # テーブル構造の変更履歴（マイグレーション）
+├── scripts/               # Routes API の返し方を試したときのスクリプト
 ├── tests/
-│   ├── conftest.py      # テスト用DBの準備
-│   └── test_spots.py    # APIのテスト
-├── alembic.ini          # Alembic の設定
-├── pytest.ini           # pytest の設定（app を import できるようにする）
-├── requirements.txt     # 必要なライブラリの一覧
-└── .env.example         # 環境変数のひな形
+│   ├── conftest.py        # テスト用 DB と合言葉の準備
+│   ├── test_spots.py      # /spots の API のテスト
+│   ├── test_routes.py     # /routes の API のテスト
+│   ├── test_routes_api.py # Google を呼ぶ部分のテスト（モック）
+│   ├── test_scoring.py    # 採点の計算のテスト
+│   └── test_pages.py      # /map の画面のテスト
+├── Dockerfile
+├── start.sh               # 起動時に alembic upgrade head をしてから uvicorn を動かす
+├── alembic.ini            # Alembic の設定
+├── pytest.ini             # pytest の設定（app を import できるようにする）
+├── requirements.txt       # 必要なライブラリの一覧
+└── .env.example           # 環境変数のひな形
 ```
 
 ## 起動方法
