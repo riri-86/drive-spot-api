@@ -14,25 +14,25 @@
 現在は地図を見ながら手作業で楽しそうな道を探し、経由地点を置いてその道を通るルートを作っています。
 
 そこで、自分で作ったドライブルートを登録し、「どれくらい走って楽しいか」を数値で比較できるアプリを作りました。
-出発地・目的地・経由地点を指定したルートを Google の Routes API で取得し、迂回率（道のり ÷ 直線距離）やカーブの多さ(1kmあたりに曲がった角度)で採点します。
+出発地・目的地・経由地点を指定したルートを Google の Routes API で取得し、迂回率（道のり ÷ 直線距離）やカーブの多さ（1kmあたりに曲がった角度）で採点します。
 登録したルートは、一覧で並べ替えて比べたり、地図の上に道の形を書いて確かめたりできます。
 
 ## 開発の経緯
 
-最初は、バックエンドの基本(API設計・DB連携・テーブル構造の管理)を身につけるため、ドライブスポットを記録するAPI(ドライブスポット帳API)として作り始めました。
+最初は、バックエンドの基本（API設計・DB連携・テーブル構造の管理）を身につけるため、ドライブスポットを記録するAPI（ドライブスポット帳API）として作り始めました。
 その土台の上に、ルートの登録・採点・地図の画面を足しています。リポジトリ名の drive-spot-api はその名残で、スポットの機能も残しています。
 
-設計と実装はAI(Claude)に相談しながら進めました。提案をそのまま使うのではなく、作りたい機能に合うかを自分で考えて選び、コードは読み解いて説明できるように努めました。
+設計と実装はAI（Claude）に相談しながら進めました。提案をそのまま使うのではなく、作りたい機能に合うかを自分で考えて選び、コードは読み解いて説明できるように努めました。
 
 ## 使用技術
-- 言語・フレームワーク:Python 3.14 / FastAPI
-- DB:PostgreSQL 16 / SQLAlchemy（ORM）/ Alembic（テーブル構造の変更管理）
-- 入力チェック:Pydantic
-- 外部API:Google Routes API(ルートの取得) / Maps JavaScript API(地図の表示)
-- 外部APIの呼び出し:httpx / polyline(道の形の文字列を座標に戻す)
-- 画面:Jinja2(HTMLテンプレート) / JavaScript
-- テスト:pytest(Google の呼び出しはモックに差し替え)
-- 実行環境:Docker / Render(公開)
+- 言語・フレームワーク：Python 3.14 / FastAPI
+- DB：PostgreSQL 16 / SQLAlchemy（ORM）/ Alembic（テーブル構造の変更管理）
+- 入力チェック：Pydantic
+- 外部API：Google Routes API（ルートの取得） / Maps JavaScript API（地図の表示）
+- 外部APIの呼び出し：httpx / polyline（道の形の文字列を座標に戻す）
+- 画面：Jinja2（HTMLテンプレート） / JavaScript
+- テスト：pytest（Google の呼び出しはモックに差し替え）
+- 実行環境：Docker / Render（公開）
 
 ## 機能
 
@@ -40,12 +40,12 @@
 
 - 出発地・目的地・経由地点を指定して、ルートを登録する
 - 登録の時に Google の Routes API で道を取得し、次の3つを計算して保存する
-  - 道のり(km)
-  - 迂回率(道のり ÷ 出発地から目的地までの直線距離)
-  - カーブの多さ(1kmあたりに曲がった角度の合計。交差点の右左折は除く)
+  - 道のり（km）
+  - 迂回率（道のり ÷ 出発地から目的地までの直線距離）
+  - カーブの多さ（1kmあたりに曲がった角度の合計。交差点の右左折は除く）
 - 地点を変えて編集すると、Google から道を取り直して採点し直す
 - 一覧を、道のり・迂回率・カーブの多さで並べ替えて比べる
-- 地図の画面(/map)で、一覧から選んだルートの道の形を地図に描く
+- 地図の画面（/map）で、一覧から選んだルートの道の形を地図に描く
 
 ### スポット
 
@@ -54,8 +54,8 @@
 
 ### 書き込みの保護
 
-- 登録・編集・削除(POST・PUT・DELETE)は、`X-API-Key` ヘッダーに合言葉がないと 401 を返す
-- 見るだけ(GET)は、誰でも使える
+- 登録・編集・削除（POST・PUT・DELETE）は、`X-API-Key` ヘッダーに合言葉がないと 401 を返す
+- 見るだけ（GET）は、誰でも使える
 
 ## API
 
@@ -75,10 +75,10 @@
 
 一覧の並べ替えは、クエリパラメータで指定します。
 
-- `sort`:`id`(登録順)／`length_km`(道のり)／`detour_ratio`(迂回率)／`curve_deg_per_km`(カーブの多さ)
-- `order`:`asc`(小さい順)／`desc`(大きい順)
+- `sort`：`id`（登録順）／`length_km`（道のり）／`detour_ratio`（迂回率）／`curve_deg_per_km`（カーブの多さ）
+- `order`：`asc`（小さい順）／`desc`（大きい順）
 
-例:`GET /routes?sort=curve_deg_per_km&order=desc`(カーブの多い順)
+例：`GET /routes?sort=curve_deg_per_km&order=desc`（カーブの多い順）
 
 ## ディレクトリ構成
 
@@ -123,7 +123,7 @@ drive-spot-api/
 ### 必要なもの
 - Python 3.14
 - Docker
-- Google Cloud のAPIキー(Routes API 用と Maps JavaScript API 用の2つ)
+- Google Cloud のAPIキー（Routes API 用と Maps JavaScript API 用の2つ）
 
 ### 手順
 
@@ -137,7 +137,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 3. 環境変数ファイルを用意(中身は下の「環境変数」を参照)
+# 3. 環境変数ファイルを用意（中身は下の「環境変数」を参照）
 cp .env.example .env
 
  # .env を開き、 DATABASE_URL と TEST_DATABASE_URL の両方で「ユーザー名」と「パスワード」を postgres に書き換えてください
@@ -154,7 +154,7 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-### 環境変数(.env)
+### 環境変数（.env）
 
 | 名前 | 内容 |
 | --- | --- |
@@ -165,7 +165,7 @@ uvicorn app.main:app --reload
 | `ADMIN_API_KEY` | 書き込みの API の合言葉。自分で決めた長い文字列を入れる |
 
 - Google のキーは、Google Cloud のコンソールで作ります。2つに分け、それぞれ使うAPIだけに制限してください
-- 地図用のキーはブラウザから見えるため、ウェブサイトの制限(`http://127.0.0.1:8000/*` など)もかけてください
+- 地図用のキーはブラウザから見えるため、ウェブサイトの制限（`http://127.0.0.1:8000/*` など）もかけてください
 - 合言葉は、次のコマンドで作れます
 
 ```bash
@@ -174,8 +174,8 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 ### 起動したあと
 
-- http://127.0.0.1:8000/docs :Swagger UI で API を試せます。登録・編集・削除は、右上の **Authorize** に `ADMIN_API_KEY` の値を入れてから実行します
-- http://127.0.0.1:8000/map :地図の画面です
+- http://127.0.0.1:8000/docs ：Swagger UI で API を試せます。登録・編集・削除は、右上の **Authorize** に `ADMIN_API_KEY` の値を入れてから実行します
+- http://127.0.0.1:8000/map ：地図の画面です
 
 ## テスト
 
