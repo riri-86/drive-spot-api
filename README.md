@@ -15,7 +15,7 @@
 
 そこで、自分で作ったドライブルートを登録し、「どれくらい走って楽しいか」を数値で比較できるアプリを作りました。
 出発地・目的地・経由地点を指定したルートを Google の Routes API で取得し、迂回率（道のり ÷ 直線距離）やカーブの多さ（1kmあたりに曲がった角度）で採点します。
-登録したルートは、一覧で並べ替えて比べたり、地図の上に道の形を書いて確かめたりできます。
+登録したルートは、一覧で並べ替えて比べたり、地図の上に道の形を描いて確かめたりできます。
 
 ## 開発の経緯
 
@@ -36,7 +36,7 @@
 
 ## 機能
 
-###  ルート(このアプリの中心)
+###  ルート（このアプリの中心）
 
 - 出発地・目的地・経由地点を指定して、ルートを登録する
 - 登録の時に Google の Routes API で道を取得し、次の3つを計算して保存する
@@ -54,7 +54,7 @@
 
 ### 書き込みの保護
 
-- 登録・編集・削除（POST・PUT・DELETE）は、`X-API-Key` ヘッダーに合言葉がないと 401 を返す
+- 登録・編集・削除（POST・PUT・DELETE）は、`X-API-Key` ヘッダーに正しい合言葉がないと 401 を返す
 - 見るだけ（GET）は、誰でも使える
 
 ## API
@@ -139,10 +139,6 @@ pip install -r requirements.txt
 
 # 3. 環境変数ファイルを用意（中身は下の「環境変数」を参照）
 cp .env.example .env
-
- # .env を開き、 DATABASE_URL と TEST_DATABASE_URL の両方で「ユーザー名」と「パスワード」を postgres に書き換えてください
- # 手順4の POSTGRES_PASSWORD と同じ値にしてください
-
 
 # 4. PostgreSQL を起動
 docker run --name drive-spot-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=drive_spot -v drive-spot-data:/var/lib/postgresql/data -p 5432:5432 -d postgres:16
