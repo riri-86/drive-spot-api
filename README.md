@@ -121,6 +121,7 @@ drive-spot-api/
 ### 必要なもの
 - Python 3.14
 - Docker
+- Google Cloud のAPIキー(Routes API 用と Maps JavaScript API 用の2つ)
 
 ### 手順
 
@@ -134,7 +135,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 3. 環境変数ファイルを用意
+# 3. 環境変数ファイルを用意(中身は下の「環境変数」を参照)
 cp .env.example .env
 
  # .env を開き、 DATABASE_URL と TEST_DATABASE_URL の両方で「ユーザー名」と「パスワード」を postgres に書き換えてください
@@ -151,7 +152,28 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-起動後、http://127.0.0.1:8000/docs を開くと Swagger UI から API を試せます。
+### 環境変数(.env)
+
+| 名前 | 内容 |
+| --- | --- |
+| `DATABASE_URL` | 開発用 DB。「ユーザー名」と「パスワード」を `postgres` に書き換える（手順4の `POSTGRES_PASSWORD` と同じ値） |
+| `TEST_DATABASE_URL` | テスト用 DB。書き換え方は `DATABASE_URL` と同じ |
+| `GOOGLE_MAPS_API_KEY` | Routes API のキー。ルートの登録・編集のときに使う |
+| `GOOGLE_MAPS_JS_API_KEY` | Maps JavaScript API のキー。地図の画面（/map）で使う |
+| `ADMIN_API_KEY` | 書き込みの API の合言葉。自分で決めた長い文字列を入れる |
+
+- Google のキーは、Google Cloud のコンソールで作ります。2つに分け、それぞれ使うAPIだけに制限してください
+- 地図用のキーはブラウザから見えるため、ウェブサイトの制限(`http://127.0.0.1:8000/*` など)もかけてください
+- 合言葉は、次のコマンドで作れます
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+### 起動したあと
+
+- http://127.0.0.1:8000/docs :Swagger UI で API を試せます。登録・編集・削除は、右上の **Authorize** に `ADMIN_API_KEY` の値を入れてから実行します
+- http://127.0.0.1:8000/map :地図の画面です
 
 ## テスト
 
